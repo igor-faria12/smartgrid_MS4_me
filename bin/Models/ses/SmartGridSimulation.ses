@@ -1,0 +1,4 @@
+From the top perspective, sequenceDiagram is made of Medidor1, Medidor2, Medidor3, and Distribuidora!
+From the top perspective, Medidor1 sends Consumo to Distribuidora!
+From the top perspective, Medidor2 sends Consumo to Distribuidora!
+From the top perspective, Medidor3 sends Consumo to Distribuidora!
