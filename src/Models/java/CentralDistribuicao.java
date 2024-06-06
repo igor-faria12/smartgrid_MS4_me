@@ -1,7 +1,7 @@
 /* Do not remove or modify this comment!  It is required for file identification!
 DNL
-platform:/resource/smartgrid/src/Models/dnl/Distribuidora.dnl
-123015
+platform:/resource/smartgrid/src/Models/dnl/CentralDistribuicao.dnl
+2050320927
  Do not remove or modify this comment!  It is required for file identification! */
 package Models.java;
 
@@ -30,14 +30,25 @@ import com.ms4systems.devs.helpers.impl.SimulationOptionsImpl;
 import com.ms4systems.devs.simviewer.standalone.SimViewer;
 
 @SuppressWarnings("unused")
-public class Distribuidora extends AtomicModelImpl implements PhaseBased,
+public class CentralDistribuicao extends AtomicModelImpl implements PhaseBased,
     StateVariableBased {
     private static final long serialVersionUID = 1L;
+
+    //ID:SVAR:0
+    private static final int ID_MEDICAOCONSUMO = 0;
+
+    //ENDID
+    //ID:SVAR:1
+    private static final int ID_MEDICAOPRODUCAO = 1;
 
     // Declare state variables
     private PropertyChangeSupport propertyChangeSupport =
         new PropertyChangeSupport(this);
-    String phase = "";
+    protected Consumo medicaoConsumo;
+    protected Producao medicaoProducao;
+
+    //ENDID
+    String phase = "s0";
     String previousPhase = null;
     Double sigma = Double.POSITIVE_INFINITY;
     Double previousSigma = Double.NaN;
@@ -45,9 +56,29 @@ public class Distribuidora extends AtomicModelImpl implements PhaseBased,
     // End state variables
 
     // Input ports
+    //ID:INP:0
+    public final Port<Serializable> inConsumo =
+        addInputPort("inConsumo", Serializable.class);
+
+    //ENDID
+    //ID:INP:1
+    public final Port<Serializable> inProducao =
+        addInputPort("inProducao", Serializable.class);
+
+    //ENDID
     // End input ports
 
     // Output ports
+    //ID:OUTP:0
+    public final Port<Consumo> outConsumo =
+        addOutputPort("outConsumo", Consumo.class);
+
+    //ENDID
+    //ID:OUTP:1
+    public final Port<Producao> outProducao =
+        addOutputPort("outProducao", Producao.class);
+
+    //ENDID
     // End output ports
     protected SimulationOptionsImpl options = new SimulationOptionsImpl();
     protected double currentTime;
@@ -55,15 +86,15 @@ public class Distribuidora extends AtomicModelImpl implements PhaseBased,
     // This variable is just here so we can use @SuppressWarnings("unused")
     private final int unusedIntVariableForWarnings = 0;
 
-    public Distribuidora() {
-        this("Distribuidora");
+    public CentralDistribuicao() {
+        this("CentralDistribuicao");
     }
 
-    public Distribuidora(String name) {
+    public CentralDistribuicao(String name) {
         this(name, null);
     }
 
-    public Distribuidora(String name, Simulator simulator) {
+    public CentralDistribuicao(String name, Simulator simulator) {
         super(name, simulator);
     }
 
@@ -72,11 +103,41 @@ public class Distribuidora extends AtomicModelImpl implements PhaseBased,
 
         currentTime = 0;
 
+        passivateIn("s0");
+
     }
 
     @Override
     public void internalTransition() {
         currentTime += sigma;
+
+        if (phaseIs("s1")) {
+            getSimulator().modelMessage("Internal transition from s1");
+
+            //ID:TRA:s1
+            holdIn("s2", 0.0);
+
+            //ENDID
+            return;
+        }
+        if (phaseIs("s2")) {
+            getSimulator().modelMessage("Internal transition from s2");
+
+            //ID:TRA:s2
+            holdIn("null", Double.POSITIVE_INFINITY);
+
+            //ENDID
+            return;
+        }
+        if (phaseIs("s3")) {
+            getSimulator().modelMessage("Internal transition from s3");
+
+            //ID:TRA:s3
+            passivateIn("s0");
+
+            //ENDID
+            return;
+        }
 
         //passivate();
     }
@@ -92,6 +153,44 @@ public class Distribuidora extends AtomicModelImpl implements PhaseBased,
         previousSigma = sigma;
 
         // Fire state transition functions
+        if (phaseIs("s0")) {
+            if (input.hasMessages(inConsumo)) {
+                ArrayList<Message<Serializable>> messageList =
+                    inConsumo.getMessages(input);
+
+                holdIn("s1", 0.0);
+
+                // Fire state and port specific external transition functions
+                //ID:EXT:s0:inConsumo
+                StringBuilder sb = new StringBuilder();
+                for (int i = 0; i < messageList.size(); i++) {
+                    Consumo valueReceived =
+                        (Consumo) messageList.get(i).getData();
+                    double value = (double) valueReceived.getValue();
+                    sb.append(value + ",");
+                }
+                sb.deleteCharAt(sb.length() - 1);
+                System.out.println("Values: " + sb.toString());
+
+                //ENDID
+                // End external event code
+                return;
+            }
+        }
+
+        if (phaseIs("s1")) {
+        }
+
+        if (phaseIs("s2")) {
+            if (input.hasMessages(inProducao)) {
+                ArrayList<Message<Serializable>> messageList =
+                    inProducao.getMessages(input);
+
+                holdIn("s3", 0.0);
+
+                return;
+            }
+        }
     }
 
     @Override
@@ -127,12 +226,13 @@ public class Distribuidora extends AtomicModelImpl implements PhaseBased,
 
         // Uncomment the following line to disable logging for this model
         // options.setDisableLogging(true);
-        Distribuidora model = new Distribuidora();
+        CentralDistribuicao model = new CentralDistribuicao();
         model.options = options;
 
         if (options.isDisableViewer()) { // Command line output only
             Simulation sim =
-                new SimulationImpl("Distribuidora Simulation", model, options);
+                new SimulationImpl("CentralDistribuicao Simulation", model,
+                    options);
             sim.startSimulation(0);
             sim.simulateIterations(Long.MAX_VALUE);
         } else { // Use SimViewer
@@ -150,21 +250,53 @@ public class Distribuidora extends AtomicModelImpl implements PhaseBased,
         propertyChangeSupport.removePropertyChangeListener(listener);
     }
 
+    // Getter/setter for medicaoConsumo
+    public void setMedicaoConsumo(Consumo medicaoConsumo) {
+        propertyChangeSupport.firePropertyChange("medicaoConsumo",
+            this.medicaoConsumo, this.medicaoConsumo = medicaoConsumo);
+    }
+
+    public Consumo getMedicaoConsumo() {
+        return this.medicaoConsumo;
+    }
+
+    // End getter/setter for medicaoConsumo
+
+    // Getter/setter for medicaoProducao
+    public void setMedicaoProducao(Producao medicaoProducao) {
+        propertyChangeSupport.firePropertyChange("medicaoProducao",
+            this.medicaoProducao, this.medicaoProducao = medicaoProducao);
+    }
+
+    public Producao getMedicaoProducao() {
+        return this.medicaoProducao;
+    }
+
+    // End getter/setter for medicaoProducao
+
     // State variables
     public String[] getStateVariableNames() {
-        return new String[] {  };
+        return new String[] { "medicaoConsumo", "medicaoProducao" };
     }
 
     public Object[] getStateVariableValues() {
-        return new Object[] {  };
+        return new Object[] { medicaoConsumo, medicaoProducao };
     }
 
     public Class<?>[] getStateVariableTypes() {
-        return new Class<?>[] {  };
+        return new Class<?>[] { Consumo.class, Producao.class };
     }
 
     public void setStateVariableValue(int index, Object value) {
         switch (index) {
+
+            case ID_MEDICAOCONSUMO:
+                setMedicaoConsumo((Consumo) value);
+                return;
+
+            case ID_MEDICAOPRODUCAO:
+                setMedicaoProducao((Producao) value);
+                return;
 
             default:
                 return;
@@ -191,13 +323,13 @@ public class Distribuidora extends AtomicModelImpl implements PhaseBased,
         URI dirUri;
         File dir;
         try {
-            dirUri = Distribuidora.class.getResource(".").toURI();
+            dirUri = CentralDistribuicao.class.getResource(".").toURI();
             dir = new File(dirUri);
         } catch (URISyntaxException e) {
             e.printStackTrace();
             throw new RuntimeException(
                 "Could not find Models directory. Invalid model URL: " +
-                Distribuidora.class.getResource(".").toString());
+                CentralDistribuicao.class.getResource(".").toString());
         }
         boolean foundModels = false;
         while (dir != null && dir.getParentFile() != null) {
@@ -245,6 +377,6 @@ public class Distribuidora extends AtomicModelImpl implements PhaseBased,
     }
 
     public String[] getPhaseNames() {
-        return new String[] {  };
+        return new String[] { "s0", "s1", "s2", "s3" };
     }
 }

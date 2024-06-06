@@ -1,0 +1,35 @@
+A Consumo has a value!
+the range of Consumo's value is Double!
+use medicaoConsumo with type Consumo!
+generates output on Consumo with type Consumo!
+
+A Producao has a value!
+the range of Producao's value is Double!
+use medicaoProducao with type Producao!
+generates output on Producao with type Producao!
+
+
+to start hold in s0 for time 2!
+from s0 go to s1!
+hold in s1 for time 0!
+after s1 output Consumo!
+from s1 go to s2!
+hold in s2 for time 0!
+after s2 output Producao!
+from s2 go to s0!
+
+output event for s1
+<%
+java.util.Random gerador = new java.util.Random();
+double nrConsumo = 180.0 + gerador.nextDouble() * (225.0 - 180.0);
+medicaoConsumo = new Consumo(nrConsumo);
+output.add(outConsumo, medicaoConsumo);
+%>!
+
+output event for s2
+<%
+java.util.Random gerador = new java.util.Random();
+double nrProducao = 1.384 + gerador.nextDouble() * (1.584 - 1.384);
+medicaoProducao = new Producao(nrProducao);
+output.add(outProducao, medicaoProducao);
+%>!

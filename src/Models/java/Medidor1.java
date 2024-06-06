@@ -1,7 +1,7 @@
 /* Do not remove or modify this comment!  It is required for file identification!
 DNL
 platform:/resource/smartgrid/src/Models/dnl/Medidor1.dnl
-123015
+-1422531397
  Do not remove or modify this comment!  It is required for file identification! */
 package Models.java;
 
@@ -15,6 +15,7 @@ import java.net.URI;
 import java.net.URISyntaxException;
 
 import java.util.ArrayList;
+import java.util.Random;
 
 import com.ms4systems.devs.core.message.Message;
 import com.ms4systems.devs.core.message.MessageBag;
@@ -34,12 +35,23 @@ public class Medidor1 extends AtomicModelImpl implements PhaseBased,
     StateVariableBased {
     private static final long serialVersionUID = 1L;
 
+    //ID:SVAR:0
+    private static final int ID_MEDICAOCONSUMO = 0;
+
+    //ENDID
+    //ID:SVAR:1
+    private static final int ID_MEDICAOPRODUCAO = 1;
+
     // Declare state variables
     private PropertyChangeSupport propertyChangeSupport =
         new PropertyChangeSupport(this);
-    String phase = "";
+    protected Consumo medicaoConsumo;
+    protected Producao medicaoProducao;
+
+    //ENDID
+    String phase = "s0";
     String previousPhase = null;
-    Double sigma = Double.POSITIVE_INFINITY;
+    Double sigma = 2.0;
     Double previousSigma = Double.NaN;
 
     // End state variables
@@ -48,6 +60,16 @@ public class Medidor1 extends AtomicModelImpl implements PhaseBased,
     // End input ports
 
     // Output ports
+    //ID:OUTP:0
+    public final Port<Consumo> outConsumo =
+        addOutputPort("outConsumo", Consumo.class);
+
+    //ENDID
+    //ID:OUTP:1
+    public final Port<Producao> outProducao =
+        addOutputPort("outProducao", Producao.class);
+
+    //ENDID
     // End output ports
     protected SimulationOptionsImpl options = new SimulationOptionsImpl();
     protected double currentTime;
@@ -72,11 +94,41 @@ public class Medidor1 extends AtomicModelImpl implements PhaseBased,
 
         currentTime = 0;
 
+        holdIn("s0", 2.0);
+
     }
 
     @Override
     public void internalTransition() {
         currentTime += sigma;
+
+        if (phaseIs("s0")) {
+            getSimulator().modelMessage("Internal transition from s0");
+
+            //ID:TRA:s0
+            holdIn("s1", 0.0);
+
+            //ENDID
+            return;
+        }
+        if (phaseIs("s1")) {
+            getSimulator().modelMessage("Internal transition from s1");
+
+            //ID:TRA:s1
+            holdIn("s2", 0.0);
+
+            //ENDID
+            return;
+        }
+        if (phaseIs("s2")) {
+            getSimulator().modelMessage("Internal transition from s2");
+
+            //ID:TRA:s2
+            holdIn("s0", 2.0);
+
+            //ENDID
+            return;
+        }
 
         //passivate();
     }
@@ -110,6 +162,30 @@ public class Medidor1 extends AtomicModelImpl implements PhaseBased,
     public MessageBag getOutput() {
         MessageBag output = new MessageBagImpl();
 
+        if (phaseIs("s1")) {
+
+            // Output event code
+            //ID:OUT:s1
+            Random gerador = new Random();
+            double nrConsumo = 180.0 + gerador.nextDouble() * (225.0 - 180.0);
+            medicaoConsumo = new Consumo(nrConsumo);
+            output.add(outConsumo, medicaoConsumo);
+
+            //ENDID
+            // End output event code
+        }
+        if (phaseIs("s2")) {
+
+            // Output event code
+            //ID:OUT:s2
+            Random gerador = new Random();
+            double nrProducao = 1.384 + gerador.nextDouble() * (1.584 - 1.384);
+            medicaoProducao = new Producao(nrProducao);
+            output.add(outProducao, medicaoProducao);
+
+            //ENDID
+            // End output event code
+        }
         return output;
     }
 
@@ -150,21 +226,53 @@ public class Medidor1 extends AtomicModelImpl implements PhaseBased,
         propertyChangeSupport.removePropertyChangeListener(listener);
     }
 
+    // Getter/setter for medicaoConsumo
+    public void setMedicaoConsumo(Consumo medicaoConsumo) {
+        propertyChangeSupport.firePropertyChange("medicaoConsumo",
+            this.medicaoConsumo, this.medicaoConsumo = medicaoConsumo);
+    }
+
+    public Consumo getMedicaoConsumo() {
+        return this.medicaoConsumo;
+    }
+
+    // End getter/setter for medicaoConsumo
+
+    // Getter/setter for medicaoProducao
+    public void setMedicaoProducao(Producao medicaoProducao) {
+        propertyChangeSupport.firePropertyChange("medicaoProducao",
+            this.medicaoProducao, this.medicaoProducao = medicaoProducao);
+    }
+
+    public Producao getMedicaoProducao() {
+        return this.medicaoProducao;
+    }
+
+    // End getter/setter for medicaoProducao
+
     // State variables
     public String[] getStateVariableNames() {
-        return new String[] {  };
+        return new String[] { "medicaoConsumo", "medicaoProducao" };
     }
 
     public Object[] getStateVariableValues() {
-        return new Object[] {  };
+        return new Object[] { medicaoConsumo, medicaoProducao };
     }
 
     public Class<?>[] getStateVariableTypes() {
-        return new Class<?>[] {  };
+        return new Class<?>[] { Consumo.class, Producao.class };
     }
 
     public void setStateVariableValue(int index, Object value) {
         switch (index) {
+
+            case ID_MEDICAOCONSUMO:
+                setMedicaoConsumo((Consumo) value);
+                return;
+
+            case ID_MEDICAOPRODUCAO:
+                setMedicaoProducao((Producao) value);
+                return;
 
             default:
                 return;
@@ -245,6 +353,6 @@ public class Medidor1 extends AtomicModelImpl implements PhaseBased,
     }
 
     public String[] getPhaseNames() {
-        return new String[] {  };
+        return new String[] { "s0", "s1", "s2" };
     }
 }

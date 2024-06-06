@@ -1,0 +1,42 @@
+A Consumo has a value!
+the range of Consumo's value is Double!
+use medicaoConsumo with type Consumo!
+generates output on Consumo with type Consumo!
+
+A Producao has a value!
+the range of Producao's value is Double!
+use medicaoProducao with type Producao!
+generates output on Producao with type Producao!//environment //sense
+
+to start passivate in s0!
+when in s0 and receive Consumo go to s1!
+hold in s1 for time 0!
+from s1 go to s2!
+hold in s2 for time 0!
+when in s2 and receive Producao go to s3!
+hold in s3 for time 0!
+from s3 go to s0!
+
+external event for s0 with Consumo
+<%
+StringBuilder sb = new StringBuilder();
+for(int i = 0; i < messageList.size(); i++){
+	Consumo valueReceived = (Consumo)messageList.get(i).getData();
+	double value = (double) valueReceived.getValue();
+	sb.append(value + ",");
+}
+      sb.deleteCharAt(sb.length() - 1);
+      System.out.println("Values: " + sb.toString());
+%>!
+
+external event for s1 with Producao
+<%
+StringBuilder sb = new StringBuilder();
+for(int i = 0; i < messageList.size(); i++){
+	Consumo valueReceived = (Consumo)messageList.get(i).getData();
+	double value = (double) valueReceived.getValue();
+	sb.append(value + ",");
+}
+      sb.deleteCharAt(sb.length() - 1);
+      System.out.println("Values: " + sb.toString());
+%>!

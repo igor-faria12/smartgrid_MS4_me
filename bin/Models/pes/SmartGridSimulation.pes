@@ -1,0 +1,4 @@
+set name of model as sequenceDiagram !
+pruned from SmartGridSimulation.ses !
+mergeAll from SmartGridSimulation.ses !
+write class files !
