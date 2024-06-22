@@ -1,0 +1,35 @@
+A Consumo has a value!
+the range of Consumo's value is Double!
+use medicaoConsumo with type Consumo!
+generates output on Consumo with type Consumo!
+
+A Producao has a value!
+the range of Producao's value is Double!
+use medicaoProducao with type Producao!
+
+to start passivate in s0!
+when in s0 and receive Consumo go to s1!
+passivate in s1!
+when in s1 and receive Producao go to s2!
+hold in s2 for time 1!
+after s2 output Consumo!
+from s2 go to s0!
+
+external event for s0 with Consumo
+<%
+medicaoConsumo = (Consumo) messageList.get(0).getData();
+%>!
+
+
+external event for s1 with Producao
+<%
+medicaoProducao = (Producao) messageList.get(0).getData();
+
+%>!
+
+
+output event for s2
+<%
+medicaoConsumo.setValue(medicaoConsumo.getValue() - medicaoProducao.getValue());
+output.add(outConsumo, medicaoConsumo);
+%>!

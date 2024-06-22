@@ -1,0 +1,25 @@
+add library <%
+import java.text.DecimalFormat;
+%>!
+
+A Consumo has a value!
+the range of Consumo's value is Double!
+use medicaoConsumo with type Consumo!
+
+use tarifa with type double and default "0.71063"!
+use dia with type int and default "1"!
+
+to start passivate in s0!
+when in s0 and receive Consumo go to s0!
+
+
+external event for s0 with Consumo
+<%
+dia += 1;
+medicaoConsumo = (Consumo) messageList.get(0).getData();
+DecimalFormat numberFormat = new DecimalFormat("#.00");
+System.out.println("Consumo/Custo no dia " + dia + ": "
+	+ numberFormat.format(medicaoConsumo.getValue()) + "/" 
+	+ (numberFormat.format(medicaoConsumo.getValue() * tarifa))
+);
+%>!

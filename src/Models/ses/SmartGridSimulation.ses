@@ -1,0 +1,6 @@
+From the top perspective, sequenceDiagram is made of PainelSolar, Residencia, Medidor, and CentralEnergia!
+From the top perspective, PainelSolar sends Producao to Residencia!
+From the top perspective, Residencia sends Consumo to Medidor!
+From the top perspective, Residencia sends Producao to Medidor!
+From the top perspective, Medidor sends Consumo to CentralEnergia!
+

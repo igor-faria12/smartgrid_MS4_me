@@ -1,0 +1,48 @@
+A Consumo has a value!
+the range of Consumo's value is Double!
+use medicaoConsumo with type Consumo!
+generates output on Consumo with type Consumo!
+
+A Producao has a value!
+the range of Producao's value is Double!
+use medicaoProducao with type Producao!
+generates output on Producao with type Producao!
+
+/* Site utilizado na simualção de valores de consumo:
+ * https://enel-go.simuladordeconsumo.com.br/
+ * Valores em kWh diario
+ */
+use consumoSala with type double and default "1.65"!
+use consumoQuarto with type double and default "4.62"!
+use consumoLavanderia with type double and default "3.0"!
+use consumoEscritorio with type double and default "2.08"!
+use consumoCozinha with type double and default "4.66"!
+use consumoBanheiro with type double and default "3.75"!
+
+
+to start passivate in s0!
+when in s0 and receive Producao go to s1!
+hold in s1 for time 0!
+after s1 output Consumo!
+from s1 go to s2!
+hold in s2 for time 0!
+after s2 output Producao!
+from s2 go to s0!
+
+
+output event for s1
+<%
+double nrConsumo = consumoSala + consumoLavanderia + consumoEscritorio + consumoQuarto + consumoCozinha + consumoBanheiro;
+medicaoConsumo = new Consumo(nrConsumo);
+output.add(outConsumo, medicaoConsumo);
+%>!
+
+external event for s0 with Producao
+<%
+medicaoProducao = (Producao) messageList.get(0).getData();
+%>!
+
+output event for s2
+<%
+output.add(outProducao, medicaoProducao);
+%>!

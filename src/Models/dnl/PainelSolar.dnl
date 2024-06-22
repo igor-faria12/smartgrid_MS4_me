@@ -1,0 +1,27 @@
+A Producao has a value!
+the range of Producao's value is Double!
+use medicaoProducao with type Producao!
+generates output on Producao with type Producao!
+
+/*
+ * Modelo de Placa Solar utilizada:
+ * https://www.neosolar.com.br/loja/painel-solar-fotovoltaico-585w-osda-oda585-36-v-mh.html
+ * 
+ * */
+ 
+use qtdPlacaSolar with type int and default "3"!
+use prodMediaPorDia with type double and default "2.295"!
+
+to start hold in inicio for time 2!
+from inicio go to s1!
+hold in s1 for time 0!
+after s1 output Producao!
+from s1 go to inicio!
+
+
+output event for s1
+<%
+double nrProducao = qtdPlacaSolar * prodMediaPorDia;
+medicaoProducao = new Producao(nrProducao);
+output.add(outProducao, medicaoProducao);
+%>!
